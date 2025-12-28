@@ -120,3 +120,4 @@
 {"level":"error","message":"Fatal error:","service":"kotak-options-bot","timestamp":"2025-12-26 23:34:35"}
 {"level":"error","message":"Fatal error:","service":"kotak-options-bot","timestamp":"2025-12-26 23:38:39"}
 {"level":"error","message":"Fatal error:","service":"kotak-options-bot","timestamp":"2025-12-26 23:39:41"}
+{"error":[{"code":"10506","message":"Invalid TOTP"}],"level":"error","message":"TOTP Login Error:","service":"kotak-options-bot","timestamp":"2025-12-28 16:55:42"}
