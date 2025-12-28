@@ -77,5 +77,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log("Health server running on port", PORT);
+  console.log("Health server running on port 5000");
 });
