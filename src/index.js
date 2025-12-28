@@ -76,6 +76,6 @@ app.get("/", (req, res) => {
   res.send("Trading bot running");
 });
 
-app.listen(PORT, () => {
+app.listen(5000, () => {
   console.log("Health server running on port", PORT);
 });
