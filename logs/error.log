@@ -121,3 +121,5 @@
 {"level":"error","message":"Fatal error:","service":"kotak-options-bot","timestamp":"2025-12-26 23:38:39"}
 {"level":"error","message":"Fatal error:","service":"kotak-options-bot","timestamp":"2025-12-26 23:39:41"}
 {"error":[{"code":"10506","message":"Invalid TOTP"}],"level":"error","message":"TOTP Login Error:","service":"kotak-options-bot","timestamp":"2025-12-28 16:55:42"}
+{"error":[{"code":400,"message":"Invalid field 'MobileNumber'; must be a valid mobile number"}],"level":"error","message":"TOTP Login Error:","service":"kotak-options-bot","timestamp":"2025-12-29 00:15:24"}
+{"error":[{"code":400,"message":"Invalid field 'MobileNumber'; must be a valid mobile number"}],"level":"error","message":"TOTP Login Error:","service":"kotak-options-bot","timestamp":"2025-12-29 00:15:28"}

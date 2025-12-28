@@ -3,6 +3,11 @@ const logger = require("../utils/logger");
 const config = require("../config/config");
 const { authenticator } = require('otplib');
 
+authenticator.options = {
+    step: 30,
+    window: 1
+};
+
 class kotakAuth {
     constructor() {
         this.sessionToken = null;
@@ -19,9 +24,9 @@ class kotakAuth {
 
             const totp = authenticator.generate(process.env.TOTP_SECRET);
             const payload = {
-                mobileNumber: "+916351650589",   // 🔥 THIS WAS THE BUG
+                mobileNumber: "+916351650589",
                 ucc: config.credentials.ucc,
-                totp: String(totp)
+                totp: totp
             };
 
             const headers = {
@@ -35,19 +40,15 @@ class kotakAuth {
                 payload,
                 { headers }
             );
-
-            if (res.data?.data) {             
-                this.viewToken = res.data.data.token;
-                this.viewSid = res.data.data.sid;
-                logger.info("TOTP authentication successful");
-                return true;
-            }
-
-            throw new Error("Invalid TOTP response");
+            this.viewToken = res.data.data.token;
+            this.viewSid = res.data.data.sid;
+            logger.info("TOTP authentication successful");
         } catch (error) {
             logger.error(
                 "TOTP Login Error:",
-                error.response?.data || error.message
+                typeof error.response?.data === "string"
+                    ? error.response.data
+                    : JSON.stringify(error.response?.data)
             );
             throw error;
         }
@@ -57,7 +58,7 @@ class kotakAuth {
     // Step 2: Validate MPIN and get session token
     async validateMPIN() {
         try {
-            logger.info("Step 2: Validating MPIN...");            
+            logger.info("Step 2: Validating MPIN...");
             const res = await axios.post(
                 config.api.validateUrl,
                 {
