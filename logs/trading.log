@@ -4585,3 +4585,23 @@
 {"level":"info","message":"Entry: Mon-Thu at 3:15 PM IST","service":"kotak-options-bot","timestamp":"2025-12-28 16:57:11"}
 {"level":"info","message":"Exit: Tue-Fri at 9:30 AM IST","service":"kotak-options-bot","timestamp":"2025-12-28 16:57:11"}
 {"level":"info","message":"\nShutting down gracefully...","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:28"}
+{"level":"info","message":"Loaded 0 existing positions","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"======================================================================","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"KOTAK NEO OPTIONS TRADING BOT","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"======================================================================","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"Paper Trade Mode: ENABLED","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"Trade Quantity: 50","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"Step 1: Authenticating with TOTP...","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:37"}
+{"level":"info","message":"TOTP authentication successful","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Step 2: Validating MPIN...","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"MPIN Validation successfully","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Base URL: https://mis.kotaksecurities.com","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"✓ Authentication successful","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"\n --- Starting Automated Trading --- ","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Starting trade scheduler...","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Entry trades scheduled: Mon-Thu at 15:15","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Exit trades scheduled: Tue-Fri at 9:30","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Scheduler started successfully","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"\nBot is now running","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Entry: Mon-Thu at 3:15 PM IST","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}
+{"level":"info","message":"Exit: Tue-Fri at 9:30 AM IST","service":"kotak-options-bot","timestamp":"2025-12-28 16:58:38"}

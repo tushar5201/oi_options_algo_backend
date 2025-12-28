@@ -4,7 +4,9 @@ const logger = require("./utils/logger");
 const kotakAuth = require("./services/kotakAuth");
 const kotakTrading = require("./services/kotakTrading");
 const scheduler = require('./services/scheduler');
+const express = require("express");
 
+const app = express();
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -68,4 +70,12 @@ process.on('SIGTERM', () => {
 main().catch(error => {
     logger.error(`Unhandled error: ${error.stack || error}`);
     process.exit(1);
+});
+
+app.get("/", (req, res) => {
+  res.send("Trading bot running");
+});
+
+app.listen(PORT, () => {
+  console.log("Health server running on port", PORT);
 });
