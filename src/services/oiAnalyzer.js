@@ -22,6 +22,8 @@ class OIAnalyzer {
 
     filterRiseInOIRise(oiData) {
         // ✅ FIXED: Direct array access
+        console.log(oiData.data[2]);
+
         return oiData['Rise-in-OI-Rise'] || [];
     }
 
