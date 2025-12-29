@@ -1,230 +1,150 @@
-const fs = require("fs");
 const axios = require("axios");
 const logger = require("../utils/logger");
 const kotakAuth = require("./kotakAuth");
 const config = require("../config/config");
-const path = require("path");
+const Trade = require("../models/Trade");
 
 class KotakTrading {
-    constructor() {
-        this.position = [];
-        this.tradeFile = path.join(__dirname, "../../data/trades.json");
-        this.ensureDataDirectory();
-        this.loadPositions();
-    }
 
-    ensureDataDirectory() {
-        const dir = path.dirname(this.tradeFile);
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    }
-
-    loadPositions() {
-        try {
-            if (fs.existsSync(this.tradeFile)) {
-                const data = fs.readFileSync(this.tradeFile, 'utf-8');
-                if (!data || !data.trim()) {
-                    this.position = [];
-                    fs.writeFileSync(this.tradeFile, JSON.stringify(this.position, null, 2));
-                    logger.info('Initialized empty trades file.');
-                } else {
-                    this.position = JSON.parse(data);
-                    logger.info(`Loaded ${this.position.length} existing positions`);
-                }
-            }
-        } catch (error) {
-            logger.error(`Failed to load positions: ${error.message}`);
-            this.position = [];
-        }
-    }
-
-    savePositions() {
-        try {
-            fs.writeFileSync(this.tradeFile, JSON.stringify(this.position, null, 2));
-            logger.info("Positions saved successfully.");
-        } catch (error) {
-            logger.error(`Failed to save positions: ${error.message}`);
-        }
-    }
-
-    async notifyTrade(position, type = 'entry') {
-        try {
-            const message = {
-                type,
-                timestamp: new Date().toISOString(),
-                symbol: position.tradingSymbol,
-                entryPrice: position.entryPrice,
-                quantity: position.quantity,
-                paperTrade: config.trading.paperTrade,
-                pnl: position.pnl || 0
-            };
-
-            // FCM Notification (replace with your FCM endpoint)
-            if (process.env.FCM_SERVER_KEY) {
-                await axios.post('https://fcm.googleapis.com/fcm/send', {
-                    to: '/topics/trades',
-                    notification: {
-                        title: `${type.toUpperCase()} TRADE`,
-                        body: `${position.tradingSymbol} | ₹${position.entryPrice}`,
-                    },
-                    data: message
-                }, {
-                    headers: { Authorization: `key=${process.env.FCM_SERVER_KEY}` }
-                });
-            }
-            logger.info(`✅ Notification sent: ${position.tradingSymbol} (${type})`);
-        } catch (error) {
-            logger.error('Notification failed:', error.message);
-        }
-    }
-
-    async placeOrder(option, transactionType = "B") {
+    // ======================
+    // PLACE ORDER
+    // ======================
+    async placeOrder(option, side = "B") {
         const session = kotakAuth.getSession();
-        if (!session.baseUrl) throw new Error("Not authenticated.");
+        if (!session?.baseUrl) throw new Error("Not authenticated");
 
-        const orderData = {
-            am: "NO", dq: "0", es: option.exchangeSegment,
-            mp: "0", pc: "MIS", pf: "N", pr: "0",
-            pt: "MKT", qt: config.trading.quantity.toString(),
-            rt: "DAY", tp: "0", ts: option.tradingSymbol, tt: transactionType
+        if (config.trading.paperTrade) {
+            return {
+                nOrdNo: "PAPER_" + Date.now(),
+                stat: "OK"
+            };
+        }
+
+        const payload = {
+            am: "NO",
+            dq: "0",
+            es: option.exchangeSegment,
+            mp: "0",
+            pc: "MIS",
+            pf: "N",
+            pr: "0",
+            pt: "MKT",
+            qt: config.trading.quantity.toString(),
+            rt: "DAY",
+            tp: "0",
+            ts: option.tradingSymbol,
+            tt: side
         };
 
-        try {
-            if (config.trading.paperTrade) {
-                logger.info(`[PAPER] ${transactionType === "B" ? "BUY" : "SELL"} ${option.tradingSymbol}`);
-                return { nOrdNo: `Paper${Date.now()}`, stat: "Ok", stCode: 200, paperTrade: true };
-            }
-
-            const res = await axios.post(
-                `${session.baseUrl}/quick/order/rule/ms/place`,
-                `jData=${encodeURIComponent(JSON.stringify(orderData))}`,
-                {
-                    headers: {
-                        'Auth': session.sessionToken,
-                        'Sid': session.sessionSid,
-                        'neo-fin-key': 'neotradeapi',
-                        'Content-Type': 'application/x-www-form-urlencoded' // ✅ FIXED
-                    }
+        const res = await axios.post(
+            `${session.baseUrl}/quick/order/rule/ms/place`,
+            `jData=${encodeURIComponent(JSON.stringify(payload))}`,
+            {
+                headers: {
+                    Auth: session.sessionToken,
+                    Sid: session.sessionSid,
+                    "neo-fin-key": "neotradeapi",
+                    "Content-Type": "application/x-www-form-urlencoded"
                 }
-            );
-            logger.info(`Order placed: ${res.data.nOrdNo}`);
-            return res.data;
-        } catch (error) {
-            logger.error("Order failed:", error.response?.data || error.message);
-            throw error;
-        }
+            }
+        );
+
+        return res.data;
     }
 
+    // ======================
+    // ENTRY
+    // ======================
     async executeEntry(options) {
-        // ✅ Check max positions
-        const openPositions = this.getOpenPositions();
-        if (openPositions.length >= config.trading.maxPosition) {
-            logger.warn(`Max positions reached: ${openPositions.length}/${config.trading.maxPosition}`);
-            return;
-        }
-
-        logger.info("=== ENTRY TRADES ===");
-        const newPositions = [];
-
-        for (const option of options.slice(0, config.trading.maxPosition - openPositions.length)) {
+        for (const opt of options) {
             try {
-                const orderResponse = await this.placeOrder(option, "B");
-                const position = {
-                    orderId: orderResponse.nOrdNo,
-                    symbol: option.symbol,
-                    tradingSymbol: option.tradingSymbol,
-                    strikePrice: option.strikePrice,
-                    optionType: option.optionType,
-                    entryPrice: option.ltp,
+                const order = await this.placeOrder(opt, "B");
+
+                const trade = await Trade.create({
+                    orderId: order.nOrdNo,
+                    symbol: opt.symbol,
+                    tradingSymbol: opt.tradingSymbol,
+                    strikePrice: opt.strikePrice,
+                    optionType: opt.optionType,
+                    entryPrice: opt.ltp,
                     quantity: config.trading.quantity,
-                    entryTime: new Date().toISOString(),
-                    status: 'OPEN',
+                    entryTime: new Date(),
+                    status: "OPEN",
                     paperTrade: config.trading.paperTrade
-                };
+                });
 
-                newPositions.push(position);
-                await this.notifyTrade(position, 'entry');
-                logger.info(`✅ Position opened: ${position.tradingSymbol}`);
-            } catch (error) {
-                logger.error(`❌ Entry failed ${option.tradingSymbol}:`, error.message);
+                logger.info(`✅ ENTRY: ${trade.tradingSymbol}`);
+            } catch (err) {
+                logger.error("Entry failed:", err.message);
             }
         }
-
-        this.position.push(...newPositions);
-        this.savePositions();
-        logger.info(`Entry complete. Open: ${this.getOpenPositions().length}`);
     }
 
+    // ======================
+    // EXIT
+    // ======================
     async executeExit() {
-        logger.info("=== EXIT TRADES ===");
-        const openPositions = this.getOpenPositions();
-        if (openPositions.length === 0) {
-            logger.info("No positions to exit");
-            return;
-        }
+        const openTrades = await Trade.find({ status: "OPEN" });
 
-        for (const position of openPositions) {
+        for (const trade of openTrades) {
             try {
-                // Fetch live LTP before exit
-                const ltp = await this.getLiveLTP(position.tradingSymbol);
-                const option = {
-                    exchangeSegment: 'nse_fo',
-                    tradingSymbol: position.tradingSymbol,
-                    ltp: ltp
-                };
+                const ltp = await this.getLiveLTP(trade.tradingSymbol);
 
-                const orderResponse = await this.placeOrder(option, 'S');
-                position.exitPrice = ltp;
-                position.exitTime = new Date().toISOString();
-                position.status = 'CLOSED';
-                position.pnl = (ltp - position.entryPrice) * position.quantity;
-                position.exitOrderId = orderResponse.nOrdNo;
+                await this.placeOrder(
+                    { tradingSymbol: trade.tradingSymbol, exchangeSegment: "nse_fo" },
+                    "S"
+                );
 
-                await this.notifyTrade(position, 'exit');
-                logger.info(`✅ Closed ${position.tradingSymbol} | P&L: ₹${position.pnl.toFixed(2)}`);
-            } catch (error) {
-                logger.error(`❌ Exit failed ${position.tradingSymbol}:`, error.message);
+                trade.exitPrice = ltp;
+                trade.exitTime = new Date();
+                trade.pnl = (ltp - trade.entryPrice) * trade.quantity;
+                trade.status = "CLOSED";
+
+                await trade.save();
+
+                logger.info(
+                    `✅ EXIT: ${trade.tradingSymbol} | PnL: ₹${trade.pnl.toFixed(2)}`
+                );
+            } catch (err) {
+                logger.error("Exit failed:", err.message);
             }
         }
-
-        this.savePositions();
     }
 
-    async getLiveLTP(tradingSymbol) {
-        // Mock LTP fetch - implement actual Kotak quotes API
-        return Math.random() * 100 + 50; // Replace with real API call
+    // ======================
+    // HELPERS
+    // ======================
+    async getLiveLTP() {
+        return Math.random() * 100 + 50; // replace later
     }
 
-    getOpenPositions() {
-        return this.position.filter(p => p.status === 'OPEN');
+    async getAllTrades() {
+        return Trade.find().sort({ createdAt: -1 });
     }
 
-    getAllPositions() {
-        return [...this.position]; // Return copy
+    async getTradesByDate(date) {
+        const start = new Date(date);
+        const end = new Date(date);
+        end.setHours(23, 59, 59);
+
+        return Trade.find({
+            entryTime: { $gte: start, $lte: end }
+        });
     }
 
-    getSummary({ date, period = 'today' } = {}) {
-        const closed = this.position.filter(p => p.status === 'CLOSED');
-        let filtered = closed;
+    async getMonthlyPnL(month) {
+        const start = new Date(`${month}-01`);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + 1);
 
-        if (date) {
-            const selectedDate = new Date(date);
-            filtered = closed.filter(trade => {
-                const exitDate = new Date(trade.exitTime);
-                return exitDate.toDateString() === selectedDate.toDateString();
-            });
-        }
-
-        const totalPnL = filtered.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
-        const wins = filtered.filter(t => t.pnl > 0).length;
-        const winRate = filtered.length ? (wins / filtered.length * 100) : 0;
+        const trades = await Trade.find({
+            exitTime: { $gte: start, $lt: end }
+        });
 
         return {
-            period,
-            totalTrades: filtered.length,
-            totalPnL,
-            winRate: Math.round(winRate * 10) / 10,
-            avgPnL: filtered.length ? totalPnL / filtered.length : 0,
-            openPositions: this.getOpenPositions().length
+            totalTrades: trades.length,
+            totalPnL: trades.reduce((s, t) => s + (t.pnl || 0), 0),
+            trades
         };
     }
 }

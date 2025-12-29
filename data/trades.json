@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "orderId": "PAPER_1767036360290",
+    "symbol": "NIFTY",
+    "tradingSymbol": "NIFTY2025-Dec-30PE25900",
+    "strikePrice": 25900,
+    "optionType": "Put",
+    "entryPrice": 25.5,
+    "quantity": 50,
+    "entryTime": "2025-12-29T19:26:00.290Z",
+    "status": "OPEN",
+    "paperTrade": true
+  },
+  {
+    "orderId": "PAPER_1767036420458",
+    "symbol": "NIFTY",
+    "tradingSymbol": "NIFTY2025-Dec-30PE25900",
+    "strikePrice": 25900,
+    "optionType": "Put",
+    "entryPrice": 25.5,
+    "quantity": 50,
+    "entryTime": "2025-12-29T19:27:00.458Z",
+    "status": "OPEN",
+    "paperTrade": true
+  }
+]

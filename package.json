@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "node": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon --ignore data/ --ignore logs/ src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
     "build": "echo Build step not required"
@@ -22,6 +22,7 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "moment-timezone": "^0.6.0",
+    "mongoose": "^9.0.2",
     "morgan": "^1.10.1",
     "node-cron": "^4.2.1",
     "nodemon": "^3.1.11",
