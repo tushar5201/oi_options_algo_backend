@@ -95,7 +95,7 @@ class OIAnalyzer {
             symbol: option.symbol,
             tradingSymbol: `${option.symbol}${expiry}${type}${option.strikePrice}`,
             strikePrice: option.strikePrice,
-            optionType: option.optionType,
+            optionType: type,
             expiryDate: option.expiryDate,
             ltp: option.ltp,
             exchangeSegment: "nse_fo",

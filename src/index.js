@@ -3,12 +3,18 @@ const logger = require("./utils/logger");
 const kotakAuth = require("./services/kotakAuth");
 const scheduler = require("./services/scheduler");
 const { default: mongoose } = require("mongoose");
+const express = require("express");
+const tradeRoutes = require("./services/tradeApi");
+
+const app = express();
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log("Connected to db");
 }).catch((err) => {
     console.log("Failed to connect: ", err);
 });
+
+app.use("/api", tradeRoutes);
 
 async function startBot() {
     try {
@@ -32,3 +38,7 @@ async function startBot() {
 }
 
 startBot();
+
+app.listen(5000, () => {
+    console.log("started");    
+});

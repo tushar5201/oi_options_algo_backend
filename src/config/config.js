@@ -18,10 +18,10 @@ const config = {
     trading: {
         quantity: parseInt(process.env.TRADE_QUANTITY) || 50,
         maxPosition: parseInt(process.env.MAX_POSITION) || 2,
-        paperTrade: process.env.PAPER_TRADE === "true",
+        paperTrade: false,
 
         // Trade Timings
-        entryTime: { hour: 15, minute: 15 },
+        entryTime: { hour: 15, minute: 9 },
         exitTime: { hour: 9, minute: 30 },
 
         // Trading days (1-5 = Monday-Friday, we'll tradeMon-Thu)

@@ -114,6 +114,8 @@ class kotakAuth {
     isAuthenticated() {
         return !!(this.sessionToken && this.sessionSid && this.baseUrl);
     }
+
+    
 }
 
 module.exports = new kotakAuth();
