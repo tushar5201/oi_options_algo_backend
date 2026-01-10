@@ -44,13 +44,11 @@ class kotakAuth {
             this.viewSid = res.data.data.sid;
             logger.info("TOTP authentication successful");
         } catch (error) {
-            logger.error(
-                "TOTP Login Error:",
-                typeof error.response?.data === "string"
-                    ? error.response.data
-                    : JSON.stringify(error.response?.data)
-            );
-            throw error;
+            const errorMsg = error.response?.data?.message || 
+                           (typeof error.response?.data === "string" ? error.response.data : JSON.stringify(error.response?.data)) ||
+                           error.message;
+            logger.error("TOTP Login Error:", errorMsg);
+            throw new Error(`TOTP Login failed: ${errorMsg}`);
         }
     }
 

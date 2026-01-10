@@ -15003,3 +15003,67 @@
 {"level":"info","message":"✅ Exit Scheduler Active → Tue–Fri @ 9:30 IST","service":"kotak-options-bot","timestamp":"2026-01-10 20:50:44"}
 {"level":"info","message":"✅ Scheduler started successfully","service":"kotak-options-bot","timestamp":"2026-01-10 20:50:44"}
 {"level":"info","message":"✅ Selected 2 contracts","service":"kotak-options-bot","timestamp":"2026-01-10 20:50:44"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"🚀 KOTAK OPTIONS BOT STARTING","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"Step 1: Authenticating with TOTP...","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"TOTP authentication successful","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"Step 2: Validating MPIN...","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"MPIN Validation successfully","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"Base URL: https://mis.kotaksecurities.com","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"✅ Kotak login successful","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"🚀 Starting Trade Scheduler...","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"✅ Entry Scheduler Active → Mon–Thu @ 15:9 IST","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"✅ Exit Scheduler Active → Tue–Fri @ 9:30 IST","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"✅ Scheduler started successfully","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"⏳ Bot running...","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"Entry: Mon–Thu 3:15 PM","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"Exit: Tue–Fri 9:30 AM","service":"kotak-options-bot","timestamp":"2026-01-10 20:55:31"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"🚀 KOTAK OPTIONS BOT STARTING","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"Step 1: Authenticating with TOTP...","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"TOTP authentication successful","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"Step 2: Validating MPIN...","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"MPIN Validation successfully","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"Base URL: https://mis.kotaksecurities.com","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"✅ Kotak login successful","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"🚀 Starting Trade Scheduler...","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"✅ Entry Scheduler Active → Mon–Thu @ 15:9 IST","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"✅ Exit Scheduler Active → Tue–Fri @ 9:30 IST","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"✅ Scheduler started successfully","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"⏳ Bot running...","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"Entry: Mon–Thu 3:15 PM","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"Exit: Tue–Fri 9:30 AM","service":"kotak-options-bot","timestamp":"2026-01-10 21:21:22"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:22"}
+{"level":"info","message":"🚀 KOTAK OPTIONS BOT STARTING","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:22"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:22"}
+{"level":"info","message":"Step 1: Authenticating with TOTP...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:22"}
+{"level":"info","message":"TOTP authentication successful","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"Step 2: Validating MPIN...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"MPIN Validation successfully","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"Base URL: https://mis.kotaksecurities.com","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"✅ Kotak login successful","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"🚀 Starting Trade Scheduler...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"✅ Entry Scheduler Active → Mon–Thu @ 15:9 IST","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"✅ Exit Scheduler Active → Tue–Fri @ 9:30 IST","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"✅ Scheduler started successfully","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"⏳ Bot running...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"Entry: Mon–Thu 3:15 PM","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"Exit: Tue–Fri 9:30 AM","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:23"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:28"}
+{"level":"info","message":"🚀 KOTAK OPTIONS BOT STARTING","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:28"}
+{"level":"info","message":"====================================","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:28"}
+{"level":"info","message":"Step 1: Authenticating with TOTP...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:28"}
+{"level":"info","message":"TOTP authentication successful","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"Step 2: Validating MPIN...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"MPIN Validation successfully","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"Base URL: https://mis.kotaksecurities.com","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"✅ Kotak login successful","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"🚀 Starting Trade Scheduler...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"✅ Entry Scheduler Active → Mon–Thu @ 15:9 IST","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"✅ Exit Scheduler Active → Tue–Fri @ 9:30 IST","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"✅ Scheduler started successfully","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"⏳ Bot running...","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"Entry: Mon–Thu 3:15 PM","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}
+{"level":"info","message":"Exit: Tue–Fri 9:30 AM","service":"kotak-options-bot","timestamp":"2026-01-10 21:25:29"}

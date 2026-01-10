@@ -8,7 +8,7 @@
     "dev": "nodemon --ignore data/ --ignore logs/ src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
-    "build": "echo Build step not required"
+    "build": ""
   },
   "keywords": [],
   "author": "",

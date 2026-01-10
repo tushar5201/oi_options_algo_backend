@@ -32,7 +32,7 @@ async function startBot() {
         logger.info("Exit: Tue–Fri 9:30 AM");
 
     } catch (err) {
-        logger.error("Startup failed:", err.message);
+        logger.error("Startup failed:", err.response?.data?.message || err.message || err);
         process.exit(1);
     }
 }
