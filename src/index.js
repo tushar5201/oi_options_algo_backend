@@ -19,6 +19,20 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 
 app.use("/api", tradeRoutes);
 
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        status: "alive",
+        timestamp: new Date().toISOString(),
+        schedulerActive: scheduler.entryJob ? true : false,
+        authenticated: kotakAuth.isAuthenticated()
+    });
+});
+
+// ✅ ADD ROOT ENDPOINT (in case you need it)
+app.get("/", (req, res) => {
+    res.json({ message: "Kotak Trading Bot is running" });
+});
+
 async function startBot() {
     try {
         logger.info("====================================");
@@ -43,5 +57,5 @@ async function startBot() {
 startBot();
 
 app.listen(5000, () => {
-    console.log("started");    
+    console.log("started");
 });

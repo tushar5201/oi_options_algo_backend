@@ -18,6 +18,8 @@ class Scheduler {
 
         // Mon–Thu (1–4)
         const cronExpression = `${minute} ${hour} * * 1-4`;
+        logger.info(`📅 Entry cron scheduled: ${cronExpression}`);
+        logger.info(`📅 This means: Every Mon-Thu at ${hour}:${String(minute).padStart(2, '0')} IST`);
 
         this.entryJob = cron.schedule(
             cronExpression,
