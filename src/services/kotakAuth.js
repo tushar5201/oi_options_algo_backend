@@ -22,11 +22,7 @@ class kotakAuth {
         try {
             logger.info("Step 1: Authenticating with TOTP...");
 
-            const IST_OFFSET = 5.5 * 60 * 60 * 1000;
-
-            const totp = authenticator.generate(process.env.TOTP_SECRET, {
-                epoch: Date.now() + IST_OFFSET
-            });
+            const totp = authenticator.generate(process.env.TOTP_SECRET);
             const payload = {
                 mobileNumber: "+916351650589",
                 ucc: config.credentials.ucc,
@@ -48,9 +44,9 @@ class kotakAuth {
             this.viewSid = res.data.data.sid;
             logger.info("TOTP authentication successful");
         } catch (error) {
-            const errorMsg = error.response?.data?.message ||
-                (typeof error.response?.data === "string" ? error.response.data : JSON.stringify(error.response?.data)) ||
-                error.message;
+            const errorMsg = error.response?.data?.message || 
+                           (typeof error.response?.data === "string" ? error.response.data : JSON.stringify(error.response?.data)) ||
+                           error.message;
             logger.error("TOTP Login Error:", errorMsg);
             throw new Error(`TOTP Login failed: ${errorMsg}`);
         }
@@ -117,7 +113,7 @@ class kotakAuth {
         return !!(this.sessionToken && this.sessionSid && this.baseUrl);
     }
 
-
+    
 }
 
 module.exports = new kotakAuth();
