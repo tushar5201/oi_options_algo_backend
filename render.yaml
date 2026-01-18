@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: oi-options-algo-backend
+    runtime: node
+    buildCommand: npm install && npx playwright install --with-deps chromium
+    startCommand: node index.js

@@ -6,6 +6,8 @@ const oiAnalyzer = require("./oiAnalyzer");
 const scheduler = require("./scheduler");
 const { wrapper } = require("axios-cookiejar-support");
 const tough = require("tough-cookie");
+const fetchTopStocksPuppeteer = require("./chartInkScanner");
+const fetchTopStocksPlaywright = require("./chartInkScanner");
 
 const router = express.Router();
 
@@ -72,75 +74,9 @@ const client = wrapper(
   })
 );
 
-const SCAN_CLAUSE = `( {cash} ( latest ema( close, 61 ) > latest ema( close, 60 ) and latest rsi( 3 ) > 60 ) )`;
-
-const puppeteer = require("puppeteer");
-
-async function fetchTopStocksPuppeteer() {
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  });
-
-  const page = await browser.newPage();
-
-  await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
-  );
-
-  await page.goto("https://chartink.com/screener", {
-    waitUntil: "networkidle2",
-    timeout: 60000
-  });
-
-  const scanClause = `( {cash} ( daily close > daily ema(daily close, 61) and 1 day ago close <= 1 day ago ema(daily close, 61) and daily rsi(12) > 60 and 1 day ago rsi(12) <= 60 ) )`;
-
-  const result = await page.evaluate(async (scanClause) => {
-
-    // 1. Read CSRF token from meta tag
-    const tokenEl = document.querySelector('meta[name="csrf-token"]');
-    const csrfToken = tokenEl ? tokenEl.getAttribute("content") : null;
-
-    if (!csrfToken) {
-      return { error: "CSRF token not found in page" };
-    }
-
-    // 2. Send request with proper headers
-    const res = await fetch("/screener/process", {
-      method: "POST",
-      headers: {
-        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "x-requested-with": "XMLHttpRequest",
-        "x-csrf-token": csrfToken
-      },
-      body: "scan_clause=" + encodeURIComponent(scanClause)
-    });
-
-    const text = await res.text();
-
-    try {
-      return JSON.parse(text);
-    } catch {
-      return { error: "Non JSON response", raw: text.slice(0, 500) };
-    }
-
-  }, scanClause);
-
-  await browser.close();
-
-  if (!result || !result.data || !Array.isArray(result.data)) {
-    throw new Error(
-      "Chartink blocked or response changed: " +
-      JSON.stringify(result).slice(0, 300)
-    );
-  }
-
-  return result.data.sort((a,b) => b.per_chg - a.per_chg).slice(0, 5);
-}
-
 router.get("/top-stocks", async (req, res) => {
   try {
-    const stocks = await fetchTopStocksPuppeteer();
+    const stocks = await fetchTopStocksPlaywright();
     res.json({
       success: true,
       count: stocks.length,
