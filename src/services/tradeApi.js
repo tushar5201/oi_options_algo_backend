@@ -7,7 +7,7 @@ const scheduler = require("./scheduler");
 const { wrapper } = require("axios-cookiejar-support");
 const tough = require("tough-cookie");
 // const fetchTopStocksPuppeteer = require("./chartInkScanner");
-const fetchTopStocksPlaywright = require("./chartInkScanner");
+const fetchTopStocksPlaywright = require("./chartinkScanner");
 
 const router = express.Router();
 
