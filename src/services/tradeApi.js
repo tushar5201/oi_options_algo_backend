@@ -175,6 +175,267 @@ router.get("/today-options-live", async (req, res) => {
   }
 });
 
+router.get("/latest-entry-options", async (req, res) => {
+  try {
+    // Find the most recent entry time
+    const latestTrade = await Trade.findOne()
+      .sort({ entryTime: -1 })
+      .select('entryTime');
+
+    if (!latestTrade) {
+      return res.json({
+        success: true,
+        message: "No trades found",
+        options: [],
+        entryTime: null
+      });
+    }
+
+    const latestEntryTime = latestTrade.entryTime;
+
+    // Get all trades from this entry session
+    // Assuming all trades in one session are entered within a few minutes
+    // We'll get trades within 15 minutes of the latest entry
+    const sessionStart = new Date(latestEntryTime);
+    sessionStart.setMinutes(sessionStart.getMinutes() - 15);
+
+    const sessionEnd = new Date(latestEntryTime);
+    sessionEnd.setMinutes(sessionEnd.getMinutes() + 15);
+
+    const currentOptions = await Trade.find({
+      entryTime: {
+        $gte: sessionStart,
+        $lte: sessionEnd
+      }
+    }).sort({ entryTime: -1 });
+
+    res.json({
+      success: true,
+      count: currentOptions.length,
+      entryTime: latestEntryTime,
+      options: currentOptions.map(trade => ({
+        tradingSymbol: trade.tradingSymbol,
+        symbol: trade.symbol,
+        strikePrice: trade.strikePrice,
+        optionType: trade.optionType,
+        entryPrice: trade.entryPrice,
+        entryTime: trade.entryTime,
+        quantity: trade.quantity,
+        status: trade.status,
+        exitPrice: trade.exitPrice,
+        exitTime: trade.exitTime,
+        pnl: trade.pnl
+      }))
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+// ============================================
+// ENHANCED VERSION: With live prices
+// ============================================
+
+router.get("/latest-entry-options-live", async (req, res) => {
+  try {
+    // Find the most recent entry time
+    const latestTrade = await Trade.findOne()
+      .sort({ entryTime: -1 })
+      .select('entryTime');
+
+    if (!latestTrade) {
+      return res.json({
+        success: true,
+        message: "No trades found",
+        options: [],
+        entryTime: null
+      });
+    }
+
+    const latestEntryTime = latestTrade.entryTime;
+
+    // Get all trades from this entry session (within 15 minutes)
+    const sessionStart = new Date(latestEntryTime);
+    sessionStart.setMinutes(sessionStart.getMinutes() - 15);
+
+    const sessionEnd = new Date(latestEntryTime);
+    sessionEnd.setMinutes(sessionEnd.getMinutes() + 15);
+
+    const currentOptions = await Trade.find({
+      entryTime: {
+        $gte: sessionStart,
+        $lte: sessionEnd
+      }
+    }).sort({ entryTime: -1 });
+
+    if (currentOptions.length === 0) {
+      return res.json({
+        success: true,
+        message: "No trades in latest entry",
+        options: []
+      });
+    }
+
+    // Fetch live prices
+    const liveData = await Promise.all(
+      currentOptions.map(async (trade) => {
+        try {
+          const allData = await nseIndia.getIndexOptionChain(trade.symbol);
+
+          const matched = allData.records.data.find(d =>
+            d.strikePrice.toString() === trade.strikePrice.toString()
+          );
+
+          if (!matched) {
+            return {
+              ...trade.toObject(),
+              currentPrice: null,
+              pnl: null,
+              error: "Data not found"
+            };
+          }
+
+          const optionData = trade.optionType === "CE" ? matched.CE : matched.PE;
+          const currentPrice = optionData?.lastPrice || trade.entryPrice;
+
+          // Calculate PnL
+          let pnl = 0;
+          let pnlPercent = 0;
+
+          if (trade.status === "CLOSED" && trade.exitPrice) {
+            pnl = trade.pnl;
+            pnlPercent = ((trade.exitPrice - trade.entryPrice) / trade.entryPrice) * 100;
+          } else {
+            pnl = (currentPrice - trade.entryPrice) * trade.quantity;
+            pnlPercent = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
+          }
+
+          return {
+            tradingSymbol: trade.tradingSymbol,
+            symbol: trade.symbol,
+            strikePrice: trade.strikePrice,
+            optionType: trade.optionType,
+            entryPrice: trade.entryPrice,
+            currentPrice: currentPrice,
+            entryTime: trade.entryTime,
+            quantity: trade.quantity,
+            status: trade.status,
+            exitPrice: trade.exitPrice,
+            exitTime: trade.exitTime,
+            pnl: pnl,
+            pnlPercent: pnlPercent,
+            change: optionData?.change,
+            volume: optionData?.totalTradedVolume,
+            oi: optionData?.openInterest
+          };
+
+        } catch (error) {
+          return {
+            ...trade.toObject(),
+            currentPrice: trade.entryPrice,
+            pnl: 0,
+            error: error.message
+          };
+        }
+      })
+    );
+
+    const totalPnL = liveData.reduce((sum, opt) => sum + (opt.pnl || 0), 0);
+
+    res.json({
+      success: true,
+      count: liveData.length,
+      entryTime: latestEntryTime,
+      totalPnL: totalPnL,
+      options: liveData,
+      lastUpdated: new Date()
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+// ============================================
+// ALTERNATIVE: Group by entry session
+// ============================================
+
+router.get("/entry-sessions", async (req, res) => {
+  try {
+    // Get all trades sorted by entry time
+    const allTrades = await Trade.find()
+      .sort({ entryTime: -1 });
+
+    if (allTrades.length === 0) {
+      return res.json({
+        success: true,
+        sessions: []
+      });
+    }
+
+    // Group trades into sessions (trades within 30 minutes are same session)
+    const sessions = [];
+    let currentSession = {
+      entryTime: allTrades[0].entryTime,
+      trades: [allTrades[0]]
+    };
+
+    for (let i = 1; i < allTrades.length; i++) {
+      const timeDiff = Math.abs(
+        currentSession.entryTime - allTrades[i].entryTime
+      ) / 1000 / 60; // minutes
+
+      if (timeDiff <= 30) {
+        // Same session
+        currentSession.trades.push(allTrades[i]);
+      } else {
+        // New session
+        sessions.push(currentSession);
+        currentSession = {
+          entryTime: allTrades[i].entryTime,
+          trades: [allTrades[i]]
+        };
+      }
+    }
+
+    // Don't forget the last session
+    sessions.push(currentSession);
+
+    res.json({
+      success: true,
+      totalSessions: sessions.length,
+      latestSession: sessions[0],
+      allSessions: sessions.map(s => ({
+        entryTime: s.entryTime,
+        tradesCount: s.trades.length,
+        trades: s.trades.map(t => ({
+          tradingSymbol: t.tradingSymbol,
+          strikePrice: t.strikePrice,
+          optionType: t.optionType,
+          status: t.status,
+          pnl: t.pnl
+        }))
+      }))
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
 // Enhanced /data endpoint
 router.post("/data", async (req, res) => {
   try {
