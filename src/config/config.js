@@ -18,7 +18,7 @@ const config = {
     trading: {
         quantity: parseInt(process.env.TRADE_QUANTITY) || 50,
         maxPosition: parseInt(process.env.MAX_POSITION) || 2,
-        paperTrade: true,
+        paperTrade: false,
 
         // Trade Timings
         entryTime: { hour: 15, minute: 9 },
