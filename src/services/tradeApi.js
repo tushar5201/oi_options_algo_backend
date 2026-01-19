@@ -24,45 +24,27 @@ router.get("/trades/open", async (req, res) => {
   res.json(trades);
 });
 
-router.get("/latest-entry-options", async (req, res) => {
+// ✅ NEW: Get today's options (selected at 3:09 PM)
+router.get("/today-options", async (req, res) => {
   try {
-    // Find the most recent entry time
-    const latestTrade = await Trade.findOne()
-      .sort({ entryTime: -1 })
-      .select('entryTime');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (!latestTrade) {
-      return res.json({
-        success: true,
-        message: "No trades found",
-        options: [],
-        entryTime: null
-      });
-    }
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const latestEntryTime = latestTrade.entryTime;
-
-    // Get all trades from this entry session
-    // Assuming all trades in one session are entered within a few minutes
-    // We'll get trades within 15 minutes of the latest entry
-    const sessionStart = new Date(latestEntryTime);
-    sessionStart.setMinutes(sessionStart.getMinutes() - 15);
-
-    const sessionEnd = new Date(latestEntryTime);
-    sessionEnd.setMinutes(sessionEnd.getMinutes() + 15);
-
-    const currentOptions = await Trade.find({
+    const todayTrades = await Trade.find({
       entryTime: {
-        $gte: sessionStart,
-        $lte: sessionEnd
+        $gte: today,
+        $lt: tomorrow
       }
     }).sort({ entryTime: -1 });
 
     res.json({
       success: true,
-      count: currentOptions.length,
-      entryTime: latestEntryTime,
-      options: currentOptions.map(trade => ({
+      count: todayTrades.length,
+      entryTime: todayTrades[0]?.entryTime,
+      options: todayTrades.map(trade => ({
         tradingSymbol: trade.tradingSymbol,
         symbol: trade.symbol,
         strikePrice: trade.strikePrice,
@@ -72,7 +54,6 @@ router.get("/latest-entry-options", async (req, res) => {
         quantity: trade.quantity,
         status: trade.status,
         exitPrice: trade.exitPrice,
-        exitTime: trade.exitTime,
         pnl: trade.pnl
       }))
     });
@@ -86,53 +67,32 @@ router.get("/latest-entry-options", async (req, res) => {
   }
 });
 
-// ============================================
-// ENHANCED VERSION: With live prices
-// ============================================
-
-router.get("/latest-options-live", async (req, res) => {
+// ✅ NEW: Get real-time prices for today's options
+router.get("/today-options-live", async (req, res) => {
   try {
-    // Find the most recent entry time
-    const latestTrade = await Trade.findOne()
-      .sort({ entryTime: -1 })
-      .select('entryTime');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (!latestTrade) {
-      return res.json({
-        success: true,
-        message: "No trades found",
-        options: [],
-        entryTime: null
-      });
-    }
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const latestEntryTime = latestTrade.entryTime;
-
-    // Get all trades from this entry session (within 15 minutes)
-    const sessionStart = new Date(latestEntryTime);
-    sessionStart.setMinutes(sessionStart.getMinutes() - 15);
-
-    const sessionEnd = new Date(latestEntryTime);
-    sessionEnd.setMinutes(sessionEnd.getMinutes() + 15);
-
-    const currentOptions = await Trade.find({
+    const todayTrades = await Trade.find({
       entryTime: {
-        $gte: sessionStart,
-        $lte: sessionEnd
+        $gte: today,
+        $lt: tomorrow
       }
-    }).sort({ entryTime: -1 });
+    });
 
-    if (currentOptions.length === 0) {
+    if (todayTrades.length === 0) {
       return res.json({
         success: true,
-        message: "No trades in latest entry",
+        message: "No trades for today",
         options: []
       });
     }
 
-    // Fetch live prices
     const liveData = await Promise.all(
-      currentOptions.map(async (trade) => {
+      todayTrades.map(async (trade) => {
         try {
           const allData = await nseIndia.getIndexOptionChain(trade.symbol);
 
@@ -157,9 +117,11 @@ router.get("/latest-options-live", async (req, res) => {
           let pnlPercent = 0;
 
           if (trade.status === "CLOSED" && trade.exitPrice) {
+            // Use actual exit price for closed trades
             pnl = trade.pnl;
             pnlPercent = ((trade.exitPrice - trade.entryPrice) / trade.entryPrice) * 100;
           } else {
+            // Use current price for open trades
             pnl = (currentPrice - trade.entryPrice) * trade.quantity;
             pnlPercent = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
           }
@@ -199,81 +161,9 @@ router.get("/latest-options-live", async (req, res) => {
     res.json({
       success: true,
       count: liveData.length,
-      entryTime: latestEntryTime,
       totalPnL: totalPnL,
       options: liveData,
       lastUpdated: new Date()
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
-// ============================================
-// ALTERNATIVE: Group by entry session
-// ============================================
-
-router.get("/entry-sessions", async (req, res) => {
-  try {
-    // Get all trades sorted by entry time
-    const allTrades = await Trade.find()
-      .sort({ entryTime: -1 });
-
-    if (allTrades.length === 0) {
-      return res.json({
-        success: true,
-        sessions: []
-      });
-    }
-
-    // Group trades into sessions (trades within 30 minutes are same session)
-    const sessions = [];
-    let currentSession = {
-      entryTime: allTrades[0].entryTime,
-      trades: [allTrades[0]]
-    };
-
-    for (let i = 1; i < allTrades.length; i++) {
-      const timeDiff = Math.abs(
-        currentSession.entryTime - allTrades[i].entryTime
-      ) / 1000 / 60; // minutes
-
-      if (timeDiff <= 30) {
-        // Same session
-        currentSession.trades.push(allTrades[i]);
-      } else {
-        // New session
-        sessions.push(currentSession);
-        currentSession = {
-          entryTime: allTrades[i].entryTime,
-          trades: [allTrades[i]]
-        };
-      }
-    }
-
-    // Don't forget the last session
-    sessions.push(currentSession);
-
-    res.json({
-      success: true,
-      totalSessions: sessions.length,
-      latestSession: sessions[0],
-      allSessions: sessions.map(s => ({
-        entryTime: s.entryTime,
-        tradesCount: s.trades.length,
-        trades: s.trades.map(t => ({
-          tradingSymbol: t.tradingSymbol,
-          strikePrice: t.strikePrice,
-          optionType: t.optionType,
-          status: t.status,
-          pnl: t.pnl
-        }))
-      }))
     });
 
   } catch (err) {
