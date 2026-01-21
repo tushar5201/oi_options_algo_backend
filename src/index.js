@@ -7,7 +7,7 @@ const express = require("express");
 const tradeRoutes = require("./services/tradeApi");
 const cors = require("cors");
 const http = require("http");
-const { initializeWebSocket } = require("./services/webSocketServer");
+const { initializeWebSocket } = require("./services/websocketServer");
 
 const app = express();
 app.use(cors());
