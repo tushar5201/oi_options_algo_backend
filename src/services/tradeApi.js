@@ -441,9 +441,8 @@ router.post("/data", async (req, res) => {
   try {
     const { expiryDate, strikePrice, optionType, symbol } = req.body;
     const allData = await nseIndia.getIndexOptionChain(symbol);
-
     const matched = allData.records.data.find(d =>
-      d.expiryDate.toString() === expiryDate &&
+      d.expiryDates.toString() === expiryDate &&
       d.strikePrice.toString() === strikePrice
     );
 

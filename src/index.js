@@ -6,10 +6,13 @@ const { default: mongoose } = require("mongoose");
 const express = require("express");
 const tradeRoutes = require("./services/tradeApi");
 const cors = require("cors");
+const http = require("http");
+const { initializeWebSocket } = require("./services/webSocketServer");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log("Connected to db");
@@ -56,6 +59,11 @@ async function startBot() {
 
 startBot();
 
-app.listen(5000, () => {
+const server = http.createServer(app);
+initializeWebSocket(server);
+
+server.listen(5000, () => {
     console.log("started");
 });
+
+module.exports = { app, server };
