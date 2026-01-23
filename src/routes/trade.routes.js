@@ -1,6 +1,5 @@
 const express = require("express");
-const tradeController = require("../controllers/TradeController");
-
+const tradeController = require("../controllers/trade.controller");
 const router = express.Router();
 
 router.get("/", tradeController.getAllTrades);

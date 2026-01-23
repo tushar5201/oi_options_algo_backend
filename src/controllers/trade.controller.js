@@ -298,5 +298,5 @@ class TradeController {
         }
     }
 }
-const tradeController = new TradeController();
-module.exports = tradeController;
+
+module.exports = new TradeController();
