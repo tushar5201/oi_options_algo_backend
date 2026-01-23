@@ -1,28 +1,24 @@
 const axios = require("axios");
 const logger = require("../utils/logger");
-const kotakAuth = require("./kotakAuth");
+const kotakAuthService = require("./kotakAuth.service");
 const config = require("../config/config");
 const Trade = require("../models/Trade");
 
-class KotakTrading {
-
-    // ✅ Helper: Check if market is open
+class KotakTradingService {
     isMarketOpen() {
         const now = new Date();
-        const day = now.getDay(); // 0=Sunday, 6=Saturday
+        const day = now.getDay();
         const hour = now.getHours();
         const minute = now.getMinutes();
         const currentMinutes = hour * 60 + minute;
 
-        // Market closed on weekends
         if (day === 0 || day === 6) {
             logger.warn("⚠️ Market closed: Weekend");
             return false;
         }
 
-        // Market hours: 9:15 AM to 3:30 PM
-        const marketOpen = 9 * 60 + 15;   // 9:15 AM
-        const marketClose = 15 * 60 + 30;  // 3:30 PM
+        const marketOpen = 9 * 60 + 15;
+        const marketClose = 15 * 60 + 30;
 
         if (currentMinutes < marketOpen) {
             logger.warn(`⚠️ Market not yet open. Opens at 9:15 AM`);
@@ -38,7 +34,7 @@ class KotakTrading {
     }
 
     async placeOrder(option, side = "B") {
-        const session = kotakAuth.getSession();
+        const session = kotakAuthService.getSession();
         if (!session?.baseUrl) throw new Error("Not authenticated");
 
         if (config.trading.paperTrade) {
@@ -80,7 +76,6 @@ class KotakTrading {
             );
 
             return res.data;
-
         } catch (error) {
             let errorMsg = "Unknown error";
 
@@ -111,7 +106,6 @@ class KotakTrading {
         logger.info(`Time: ${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`);
         logger.info("========================================");
 
-        // ✅ CRITICAL: Check market status for real trading
         if (!config.trading.paperTrade) {
             if (!this.isMarketOpen()) {
                 logger.error("❌ Cannot place orders - Market is closed");
@@ -156,11 +150,9 @@ class KotakTrading {
                 };
 
                 const trade = await Trade.create(tradeData);
-
                 logger.info(`✅ SAVED TO DB: ${trade.tradingSymbol} | ID: ${trade._id}`);
 
                 successCount++;
-
             } catch (err) {
                 failCount++;
                 logger.error(`❌ Entry failed for ${opt?.tradingSymbol || 'unknown'}:`, err.message);
@@ -178,7 +170,6 @@ class KotakTrading {
         logger.info(`Time: ${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`);
         logger.info("========================================");
 
-        // ✅ CRITICAL: Check market status for real trading
         if (!config.trading.paperTrade) {
             if (!this.isMarketOpen()) {
                 logger.error("❌ Cannot place orders - Market is closed");
@@ -224,7 +215,6 @@ class KotakTrading {
 
                 logger.info(`✅ EXIT SUCCESS: ${trade.tradingSymbol} | PnL: ₹${trade.pnl.toFixed(2)}`);
                 successCount++;
-
             } catch (err) {
                 failCount++;
                 logger.error(`❌ Exit failed for ${trade.tradingSymbol}:`, err.message);
@@ -237,7 +227,6 @@ class KotakTrading {
     }
 
     async getLiveLTP(tradingSymbol) {
-        // TODO: Implement actual LTP fetching
         const randomPrice = Math.random() * 100 + 50;
         logger.warn(`⚠️ Using dummy LTP for ${tradingSymbol}: ₹${randomPrice.toFixed(2)}`);
         return randomPrice;
@@ -276,4 +265,4 @@ class KotakTrading {
     }
 }
 
-module.exports = new KotakTrading();
+module.exports = new KotakTradingService();

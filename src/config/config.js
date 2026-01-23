@@ -19,12 +19,8 @@ const config = {
         quantity: parseInt(process.env.TRADE_QUANTITY) || 50,
         maxPosition: parseInt(process.env.MAX_POSITION) || 2,
         paperTrade: true,
-
-        // Trade Timings
         entryTime: { hour: 15, minute: 9 },
         exitTime: { hour: 9, minute: 30 },
-
-        // Trading days (1-5 = Monday-Friday, we'll tradeMon-Thu)
         tradingDays: [1,2,3,4]
     },
 
@@ -33,6 +29,21 @@ const config = {
         instruments: ["NIFTY", "BANKNIFTY"],
         maxSelection: 2,
         topN: 5
+    },
+
+    // Server Configuration
+    server: {
+        port: process.env.PORT || 5000,
+        mongoUri: process.env.MONGODB_URI
+    },
+
+    // WebSocket Configuration
+    websocket: {
+        updateInterval: 3000,
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
     }
 };
 

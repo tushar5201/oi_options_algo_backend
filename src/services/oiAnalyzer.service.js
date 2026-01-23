@@ -2,8 +2,7 @@ const axios = require("axios");
 const logger = require("../utils/logger");
 const config = require("../config/config");
 
-class OIAnalyzer {
-
+class OIAnalyzerService {
     async fetchOIData() {
         const res = await axios.get(config.api.nseOiUrl, {
             headers: {
@@ -15,14 +14,10 @@ class OIAnalyzer {
         return res.data;
     }
 
-    // ✅ FIX: Extract correct block
     extractRiseInOIRise(oiData) {
         if (!oiData?.data || !Array.isArray(oiData.data)) return [];
 
-        const block = oiData.data.find(obj =>
-            obj["Rise-in-OI-Rise"]
-        );
-
+        const block = oiData.data.find(obj => obj["Rise-in-OI-Rise"]);
         return block ? block["Rise-in-OI-Rise"] : [];
     }
 
@@ -80,7 +75,6 @@ class OIAnalyzer {
 
             logger.info(`✅ Selected ${selected.length} contracts`);
             return selected.map(this.convertToKotakFormat);
-
         } catch (err) {
             logger.error("OI Analysis failed:", err.message);
             throw err;
@@ -104,4 +98,4 @@ class OIAnalyzer {
     }
 }
 
-module.exports = new OIAnalyzer();
+module.exports = new OIAnalyzerService();

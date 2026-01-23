@@ -8,7 +8,7 @@ authenticator.options = {
     window: 3
 };
 
-class kotakAuth {
+class KotakAuthService {
     constructor() {
         this.sessionToken = null;
         this.sessionSid = null;
@@ -17,7 +17,6 @@ class kotakAuth {
         this.viewSid = null;
     }
 
-    // Step 1: Login with TOTP
     async loginWithTOTP() {
         try {
             logger.info("Step 1: Authenticating with TOTP...");
@@ -35,41 +34,34 @@ class kotakAuth {
                 "Content-Type": "application/json"
             };
 
-            const res = await axios.post(
-                config.api.loginUrl,
-                payload,
-                { headers }
-            );
+            const res = await axios.post(config.api.loginUrl, payload, { headers });
             this.viewToken = res.data.data.token;
             this.viewSid = res.data.data.sid;
             logger.info("TOTP authentication successful");
         } catch (error) {
-            const errorMsg = error.response?.data?.message || 
-                           (typeof error.response?.data === "string" ? error.response.data : JSON.stringify(error.response?.data)) ||
-                           error.message;
+            const errorMsg = error.response?.data?.message ||
+                (typeof error.response?.data === "string" ? error.response.data : JSON.stringify(error.response?.data)) ||
+                error.message;
             logger.error("TOTP Login Error:", errorMsg);
             throw new Error(`TOTP Login failed: ${errorMsg}`);
         }
     }
 
-
-    // Step 2: Validate MPIN and get session token
     async validateMPIN() {
         try {
             logger.info("Step 2: Validating MPIN...");
             const res = await axios.post(
                 config.api.validateUrl,
+                { mpin: config.credentials.mpin },
                 {
-                    mpin: config.credentials.mpin
-                }, {
-                headers: {
-                    'Authorization': config.credentials.accessToken,
-                    'sid': this.viewSid,
-                    'Auth': this.viewToken,
-                    "neo-fin-key": "neotradeapi",
-                    "Content-Type": "application/json"
+                    headers: {
+                        'Authorization': config.credentials.accessToken,
+                        'sid': this.viewSid,
+                        'Auth': this.viewToken,
+                        "neo-fin-key": "neotradeapi",
+                        "Content-Type": "application/json"
+                    }
                 }
-            }
             );
 
             if (res.data && res.data.data) {
@@ -81,14 +73,13 @@ class kotakAuth {
                 logger.info(`Base URL: ${this.baseUrl}`);
                 return true;
             }
-            throw new Error("Mpin validation failed");
+            throw new Error("MPIN validation failed");
         } catch (error) {
-            logger.error("Mpin validation failed: ", error.response.data || error.message);
+            logger.error("MPIN validation failed: ", error.response?.data || error.message);
             throw error;
         }
     }
 
-    // Complete authentication code
     async authenticate() {
         await this.loginWithTOTP();
         await this.validateMPIN();
@@ -99,7 +90,6 @@ class kotakAuth {
         };
     }
 
-    // Get current session
     getSession() {
         return {
             sessionToken: this.sessionToken,
@@ -108,12 +98,9 @@ class kotakAuth {
         };
     }
 
-    // Check if session is valid
     isAuthenticated() {
         return !!(this.sessionToken && this.sessionSid && this.baseUrl);
     }
-
-    
 }
 
-module.exports = new kotakAuth();
+module.exports = new KotakAuthService();

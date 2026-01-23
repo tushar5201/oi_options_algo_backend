@@ -1,4 +1,3 @@
-// models/Trade.js
 const mongoose = require("mongoose");
 
 const tradeSchema = new mongoose.Schema({
@@ -7,17 +6,16 @@ const tradeSchema = new mongoose.Schema({
     tradingSymbol: String,
     strikePrice: Number,
     optionType: String,
-
     entryPrice: Number,
     exitPrice: Number,
     quantity: Number,
-
     entryTime: Date,
     exitTime: Date,
-
     pnl: Number,
     status: String,
     paperTrade: Boolean
-}, { timestamps: true });
+}, {
+    timestamps: true
+});
 
 module.exports = mongoose.model("Trade", tradeSchema);

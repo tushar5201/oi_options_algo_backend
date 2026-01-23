@@ -2,11 +2,12 @@ const { NseIndia } = require("stock-nse-india");
 const Trade = require("../models/Trade");
 const { Server } = require("socket.io");
 const logger = require("../utils/logger");
+const config = require("../config/config");
 
 const nseIndia = new NseIndia();
 let io = null;
-
 const updateIntervals = new Map();
+
 async function fetchLatestEntryOptionsLive() {
     try {
         const latestTrade = await Trade.findOne().sort({ entryTime: -1 }).select('entryTime');
@@ -91,7 +92,7 @@ async function fetchLatestEntryOptionsLive() {
                         change: optionData?.change,
                         volume: optionData?.totalTradedVolume,
                         oi: optionData?.openInterest
-                    }
+                    };
                 } catch (error) {
                     return {
                         ...trade.toObject(),
@@ -102,6 +103,7 @@ async function fetchLatestEntryOptionsLive() {
                 }
             })
         );
+
         const totalPnL = liveData.reduce((sum, opt) => sum + (opt.pnl || 0), 0);
 
         return {
@@ -113,31 +115,26 @@ async function fetchLatestEntryOptionsLive() {
             lastUpdated: new Date()
         };
     } catch (error) {
-        logger.error("Error fetching latest entry options:", err);
+        logger.error("Error fetching latest entry options:", error);
         return {
             success: false,
-            error: err.message
+            error: error.message
         };
     }
 }
 
 function initializeWebSocket(server) {
     io = new Server(server, {
-        cors: {
-            origin: "*", // Configure this properly in production
-            methods: ["GET", "POST"]
-        }
+        cors: config.websocket.cors
     });
 
     io.on("connection", (socket) => {
         logger.info(`🔌 Client connected: ${socket.id}`);
 
-        // Send initial data immediately
         fetchLatestEntryOptionsLive().then(data => {
             socket.emit("latestEntryOptions", data);
         });
 
-        // Start real-time updates (every 3 seconds to avoid rate limiting)
         const intervalId = setInterval(async () => {
             try {
                 const data = await fetchLatestEntryOptionsLive();
@@ -146,11 +143,10 @@ function initializeWebSocket(server) {
                 logger.error("Error in WebSocket update:", error);
                 socket.emit("error", { message: error.message });
             }
-        }, 3000); // Update every 3 seconds
+        }, config.websocket.updateInterval);
 
         updateIntervals.set(socket.id, intervalId);
 
-        // Handle client requesting manual refresh
         socket.on("refresh", async () => {
             try {
                 const data = await fetchLatestEntryOptionsLive();
@@ -160,7 +156,6 @@ function initializeWebSocket(server) {
             }
         });
 
-        // Handle disconnection
         socket.on("disconnect", () => {
             logger.info(`🔌 Client disconnected: ${socket.id}`);
             const intervalId = updateIntervals.get(socket.id);
